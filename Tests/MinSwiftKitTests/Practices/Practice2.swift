@@ -12,6 +12,7 @@ class Practice2: ParserTestCase {
         XCTAssertTrue(node is NumberNode)
         let numberNode = node as! NumberNode
         XCTAssertEqual(numberNode.value, 42)
+        // read()してるかを確かめるために
         XCTAssertEqual(parser.currentToken.tokenKind, .eof)
     }
 

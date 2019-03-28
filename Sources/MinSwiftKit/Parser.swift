@@ -10,21 +10,41 @@ class Parser: SyntaxVisitor {
 
     override func visit(_ token: TokenSyntax) {
         print("Parsing \(token.tokenKind)")
+        tokens.append(token)
     }
 
     @discardableResult
     func read() -> TokenSyntax {
-        fatalError("Not Implemented")
+//        fatalError("Not Implemented")
+//        return currentToken?.tokenKind
+        let hoge = tokens[index]
+        currentToken = hoge
+        index += 1
+        return hoge
     }
 
     func peek(_ n: Int = 0) -> TokenSyntax {
-        fatalError("Not Implemented")
+//        fatalError("Not Implemented")
+        let hoge = tokens[index + n]
+        return hoge
     }
 
     // MARK: Practice 2
 
     private func extractNumberLiteral(from token: TokenSyntax) -> Double? {
-        fatalError("Not Implemented")
+//        fatalError("Not Implemented")
+//        let double = Double?(Double(token.hashValue))
+        switch token.tokenKind {
+        case .integerLiteral(let value):
+            let hoge = Double(value)
+            return hoge
+        case .floatingLiteral(let value):
+            let hoge = Double(value)
+            return hoge
+        default:
+            return nil
+        }
+//        return Double?(token.tokenKind)
     }
 
     func parseNumber() -> Node {
@@ -35,14 +55,73 @@ class Parser: SyntaxVisitor {
         return NumberNode(value: value)
     }
 
+    private func extractVariableIdentifier(from token: TokenSyntax) -> String? {
+        switch token.tokenKind {
+        case .identifier(let value):
+            return value
+        default:
+            return nil
+        }
+    }
+
     func parseIdentifierExpression() -> Node {
-        fatalError("Not Implemented")
+        guard let value = extractVariableIdentifier(from: currentToken) else {
+            fatalError("Not Implemented")
+        }
+        read()
+
+//        guard case .identifier(let value1) = currentToken.tokenKind else {
+//            fatalError()
+//        }
+//        read()
+
+        var arguments: Array<CallExpressionNode.Argument> = []
+        while true {
+            if case .rightParen = currentToken.tokenKind {
+                break
+            } else if case .identifier(let argumentName) = currentToken.tokenKind {
+                read()
+
+                guard case .colon = currentToken.tokenKind else {
+                    fatalError()
+                }
+                read()
+
+                let value = parseExpression()
+                let argument = CallExpressionNode.Argument(label: argumentName, value: value!)
+                arguments.append(argument)
+            } else if case .comma = currentToken.tokenKind {
+                read()
+            }
+        }
+
+        return CallExpressionNode(callee: value1, arguments: arguments)
+//
+//        guard  case .leftParen = currentToken.tokenKind else {
+//            return VariableNode(identifier: value1)
+//        }
+//        read()
+//
+//        switch currentToken.tokenKind {
+//        case .rightParen:
+//            read()
+//            return CallExpressionNode(callee: value1, arguments: [])
+//        default:
+//            let body: CallExpressionNode.Argument = parseExpression() as! CallExpressionNode.Argument
+//            return CallExpressionNode(callee: value1, arguments: body)
+//        }
     }
 
     // MARK: Practice 3
 
     func extractBinaryOperator(from token: TokenSyntax) -> BinaryExpressionNode.Operator? {
-        fatalError("Not Implemented")
+//        fatalError("Not Implemented")
+        switch token.tokenKind {
+        case .spacedBinaryOperator(let value):
+            return BinaryExpressionNode.Operator.init(rawValue: value)
+        default:
+            return nil
+        }
     }
 
     private func parseBinaryOperatorRHS(expressionPrecedence: Int, lhs: Node?) -> Node? {
@@ -87,11 +166,88 @@ class Parser: SyntaxVisitor {
     // MARK: Practice 4
 
     func parseFunctionDefinitionArgument() -> FunctionNode.Argument {
-        fatalError("Not Implemented")
+//        fatalError("Not Implemented")
+        var hoge: FunctionNode.Argument
+        switch currentToken.tokenKind {
+        case .identifier(let value):
+            hoge = .init(label: value, variableName: value)
+            read()
+        default:
+            fatalError("Not Implemented")
+        }
+        read()
+        read()
+//        switch currentToken.tokenKind {
+//        case .colon:
+//            read()
+//        default:
+//            fatalError("Not Implemented")
+//        }
+//        switch currentToken.tokenKind {
+//        case .identifier(let value):
+//            hoge = .init(label: value, variableName: value)
+//            read()
+//            return hoge
+//        default:
+//            fatalError("Not Implemented")
+//        }
+        return hoge
     }
 
     func parseFunctionDefinition() -> Node {
-        fatalError("Not Implemented")
+        switch currentToken.tokenKind {
+        case .funcKeyword:
+            read()
+        default:
+            fatalError("Not Implemented")
+        }
+
+        guard case .identifier(let functionName) = currentToken.tokenKind else {
+            fatalError()
+        }
+        read()
+
+        guard case .leftParen = currentToken.tokenKind else {
+            fatalError()
+        }
+        read()
+
+        guard case .rightParen = currentToken.tokenKind else {
+            fatalError()
+        }
+        read()
+
+        guard case .arrow = currentToken.tokenKind else {
+            fatalError()
+        }
+        read()
+
+        guard case .identifier(let _) = currentToken.tokenKind else {
+            fatalError()
+        }
+        read()
+
+        guard case .leftBrace = currentToken.tokenKind else {
+            fatalError()
+        }
+        read()
+
+//        guard case .rightParen = currentToken.tokenKind else {
+//            fatalError()
+//        }
+//        read()
+
+        guard let body = parseExpression() else {
+            fatalError()
+        }
+
+        guard case .rightBrace = currentToken.tokenKind else {
+            fatalError()
+        }
+        read()
+
+        let hoge: FunctionNode = FunctionNode.init(name: functionName, arguments: [], returnType: .double, body: body)
+        return hoge
     }
 
     // MARK: Practice 7
